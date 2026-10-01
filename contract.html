@@ -1,0 +1,520 @@
+---
+title: The firmware contract
+permalink: /contract/
+description: >-
+  What a firmware zip must be, what sim-mesh gives a station when it starts it,
+  the driver interface, the ether's protocol, and how to build against the
+  virtual radio.
+---
+<style>
+.spec h2 { margin-top: 2.2em; }
+.spec h3 { margin-top: 1.6em; }
+.spec table { font-size: 0.92em; }
+.spec td:first-child code, .spec td:first-child { white-space: nowrap; }
+.spec .must { font-weight: 700; }
+.spec pre { font-size: 0.86em; }
+.spec .toc { columns: 2; column-gap: 2em; }
+@media (max-width: 640px) { .spec .toc { columns: 1; } }
+</style>
+<div class="spec">
+
+<p>This is the whole of what passes between sim-mesh and a firmware. A firmware
+that keeps it runs on sim-mesh with nothing of it in sim-mesh; sim-mesh that keeps
+it runs any such firmware. <span class="must">Must</span>, <span class="must">must not</span>
+and <span class="must">may</span> are requirements; everything else describes.</p>
+
+<pre>
+project ── its own script ──► &lt;base&gt;_&lt;arch&gt;_&lt;version&gt;.zip ──► sim firmware add ──► firmware/&lt;name&gt;/
+script  ── nodes().firmware("&lt;base&gt;_latest") ──► simd: resolve, import the zip's driver.py, DRIVER(firmware)
+simd    ── start the executable: SIM_MESH_* env, LD_LIBRARY_PATH (the radio), LD_PRELOAD (the time shim)
+station ── libsimradio-sx1262.so ── UDP, JSON ──► the ether          hello, state, tx, idle …
+simd    ── driver.wait_up / verbs / flush ──► the station          over its console, a tool, a file …
+station ── console lines ──► driver.console_line ──► station.report(event) ──► run/events.jsonl
+</pre>
+
+<ul class="toc">
+<li><a href="#zip">1. The firmware zip</a></li>
+<li><a href="#node-yaml">2. node.yaml</a></li>
+<li><a href="#provided">3. What a station is given</a></li>
+<li><a href="#process">4. The process</a></li>
+<li><a href="#time">5. Time</a></li>
+<li><a href="#driver">6. The driver</a></li>
+<li><a href="#reticulum">7. The <code>reticulum</code> category</a></li>
+<li><a href="#ether">8. The ether's protocol</a></li>
+<li><a href="#radio">9. The virtual radio</a></li>
+<li><a href="#building">10. Building against it</a></li>
+<li><a href="#example">11. A whole example</a></li>
+</ul>
+
+<h2 id="zip">1. The firmware zip</h2>
+
+<p>A firmware is one station build for one architecture: a zip archive named</p>
+<pre>&lt;base&gt;_&lt;arch&gt;_&lt;version&gt;.zip</pre>
+<ul>
+<li><b>base</b> — lower-case letters <code>a</code>–<code>z</code>, digits, <code>-</code>
+and <code>.</code>, starting with a letter or digit; never <code>_</code>. Two builds that
+differ in anything sim-mesh does not read — the virtual radio they drive among it — are two
+bases; by custom the base ends with the radio (<code>relay-sx1262</code>).</li>
+<li><b>arch</b> — the architecture it runs on, as <code>uname -m</code> spells it on Linux:
+<code>aarch64</code>, <code>x86_64</code>.</li>
+<li><b>version</b> — either a build stamp, the UTC time of the build as
+<code>YYYYMMDDhhmmss</code> (fourteen digits), or a semantic version
+<code>MAJOR.MINOR.PATCH</code> with an optional <code>-pre-release</code>. A base
+<span class="must">must</span> keep to one of the two.</li>
+</ul>
+<p>The name splits at its first and its last <code>_</code>. Installed, the firmware is the
+directory <code>firmware/&lt;base&gt;_&lt;arch&gt;_&lt;version&gt;/</code>, the zip unpacked, so a
+zip and its installed directory have one name. <code>&lt;base&gt;_latest</code> means the newest
+installed firmware of exactly that base for the machine: by stamp, or by semantic version
+(a pre-release before its release).</p>
+
+<p>Members sit at the archive's root, with forward-slash paths that <span class="must">must</span>
+stay inside it (no absolute path, no <code>..</code>). It holds <code>node.yaml</code>, the
+executable, the driver, and whatever else the station runs. A member's Unix permission
+bits, where the archive records them, are the file's; the executable is made executable
+whatever the archive says.</p>
+
+<p>A zip is refused when it is built for another architecture than the machine's, when its
+base already holds firmware versioned the other way, when a firmware of its name is
+installed already, and when its <code>node.yaml</code>, or anything it names, is missing.</p>
+
+<h2 id="node-yaml">2. node.yaml</h2>
+
+<p>A YAML mapping at the archive's root.</p>
+<table>
+<thead><tr><th>Key</th><th>Required</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><code>base</code></td><td>yes</td><td>as in the name</td></tr>
+<tr><td><code>arch</code></td><td>yes</td><td>as in the name</td></tr>
+<tr><td><code>version</code></td><td>yes</td><td>as in the name, a string</td></tr>
+<tr><td><code>category</code></td><td>yes</td><td>the driver interface its driver implements, and so the verbs it answers: <code>reticulum</code> (§7); <code>meshcore</code>, <code>meshtastic</code> to come</td></tr>
+<tr><td><code>exec</code></td><td>yes</td><td>the executable's path in the archive</td></tr>
+<tr><td><code>driver</code></td><td>yes</td><td>the driver's path in the archive, a Python file (§6)</td></tr>
+<tr><td><code>radio</code></td><td>no</td><td>the virtual radio it is linked with, by the library's name: <code>sx1262</code> is <code>libsimradio-sx1262.so</code> (§9). Absent: sim-mesh provides none, and the station speaks the ether's protocol itself (§8) or has no radio</td></tr>
+<tr><td><code>fixed</code></td><td>no</td><td>the path of a read-only data tree in the archive, which its driver may hand the station</td></tr>
+<tr><td><code>env</code></td><td>no</td><td>a mapping of environment variable to value, given to the station after sim-mesh's own (§3); a value starting <code>./</code> or <code>../</code> is a path in the installed firmware. <code>LD_LIBRARY_PATH</code> here is put before sim-mesh's, not instead of it</td></tr>
+<tr><td><code>title</code></td><td>no</td><td>what the page calls it (<code>Relay 2.1 (dev)</code>)</td></tr>
+<tr><td><code>hardware</code></td><td>no</td><td>the hardware it plays (<code>ESP32-S3</code>), shown as “virtual ESP32-S3”</td></tr>
+</tbody>
+</table>
+<p>Other keys are kept and not read.</p>
+
+<h2 id="provided">3. What a station is given</h2>
+
+<p>sim-mesh starts the executable with its argument list from the driver (§6), its working
+directory its own (below), its stdin and stdout one pty (§4), and this environment, the
+host's, then these, then node.yaml's <code>env</code>, then the driver's <code>env</code>:</p>
+<table>
+<thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>SIM_MESH_NODE_ID</code></td><td>a small integer, unique on the host: the station's id in the ether (its <code>sid</code>), and the last bytes of any MAC address it makes</td></tr>
+<tr><td><code>SIM_MESH_NODE_DIR</code></td><td>its directory and working directory; its state lives under <code>state/</code></td></tr>
+<tr><td><code>SIM_MESH_BIND_ADDR</code></td><td>its own loopback address, fixed by its id; every socket it opens <span class="must">must</span> bind here</td></tr>
+<tr><td><code>SIM_MESH_ETHER</code></td><td><code>host:port</code> of the ether</td></tr>
+<tr><td><code>SIM_MESH_RADIO_LIB</code></td><td>the path of the virtual radio its node.yaml names; its directory is first on <code>LD_LIBRARY_PATH</code></td></tr>
+<tr><td><code>SIM_MESH_BOARD</code></td><td>the board its node is, one flat JSON object: <code>chip</code>, <code>max_dbm</code> (the most at the antenna connector), and above 22 dBm a GC1109 front end's <code>fem_part</code>, <code>fem_tx_cal</code> (chip register → connector dBm), <code>fem_gain_db</code> and <code>fem_rx_gain_db</code>. The virtual radio applies the front end from it; a firmware that drives a front end takes its figures from here</td></tr>
+<tr><td><code>SIM_MESH_TIME</code></td><td><code>virtual</code> in a virtual-time run, absent in a real-time one</td></tr>
+<tr><td><code>SIM_MESH_EPOCH_US</code></td><td>virtual time: the wall-clock microseconds T 0 stands for</td></tr>
+<tr><td><code>SIM_MESH_SEED</code></td><td>virtual time: the run's seed; the time shim keys the station's <code>getentropy</code>/<code>getrandom</code> by it and the node id</td></tr>
+<tr><td><code>LD_PRELOAD</code></td><td>virtual time: the time shim, <code>libsimclock.so</code> (§5)</td></tr>
+<tr><td><code>SIM_MESH_IDLE</code></td><td>set by a driver whose station does not call <code>simradio_idle()</code> itself: <code>threads</code>, and the shim says the station is idle when every thread is blocked</td></tr>
+<tr><td><code>SIM_MESH_CLOCK_PROFILE</code></td><td>optional: node time as a function of T, <code>T:node,T:node,…</code> in microseconds, both increasing, slope 1 outside the points; absent, node time is T</td></tr>
+</tbody>
+</table>
+<p>A station reads its identity from these and from nowhere else, so two stations on one host
+never collide. <b>A station never learns where it stands</b>: its position is the ether's and
+the loss table's alone.</p>
+
+<p><b>What a station may count on.</b> sim-mesh runs everything in its own image, the
+same on every machine: Ubuntu 24.04 of the host's own architecture. An executable
+<span class="must">may</span> count on its C library and C++ runtime (<code>libc</code>,
+<code>libm</code>, <code>libstdc++</code>, <code>libgcc_s</code>), on the radio library
+node.yaml names, on the time shim, and on the image's <code>python3</code>, CPython 3.12 with
+its standard library (its driver runs in it, with <code>aiohttp</code> and <code>pyyaml</code>
+beside <code>sim_mesh</code>). Anything else it loads <span class="must">must</span> be in its
+zip: a shared library under <code>lib/</code> with <code>env: {LD_LIBRARY_PATH: ./lib}</code>,
+a Python package under a directory it puts on <code>PYTHONPATH</code>, built for CPython 3.12;
+a firmware written in Python may use the image's interpreter and need bring none. A zip
+<span class="must">must not</span> carry a radio library.</p>
+
+<h2 id="process">4. The process</h2>
+<ul>
+<li><b>stdin and stdout are the console</b>: a pty, text, shown in the map's console window
+and appended to <code>log</code> in its directory, and handed to its driver line by line
+(<code>console_line</code>). The one binary thing that may cross it is a framed RPC frame,
+which sim-mesh takes out of the stream before anything else sees it (§6).</li>
+<li><b>Exit to reboot.</b> sim-mesh starts the executable again, on the same directory and
+address, half a second later (of T, in a virtual-time run).</li>
+<li><b>State is its directory.</b> A new simulation starts it with an empty <code>state/</code>,
+or with one a snapshot kept; a factory reset empties it; a reset leaves it.</li>
+<li><b>Ports are its own</b>, on its own address. A web UI is on the port its driver names
+(<code>web_port</code>), reached through sim-mesh's proxy as
+<code>&lt;node&gt;.&lt;simulation&gt;.sim.localhost:8800</code>.</li>
+<li><b>It may be several processes.</b> A process it starts that waits on time joins a
+virtual-time run as a station of its own, under the id its driver names for it
+(<code>sids</code>), with the same address, the time shim and <code>SIM_MESH_IDLE=threads</code>:
+it opens its link (<code>simradio_station_open</code>) and, with no radio, no chip. Which of
+them reads the console is the driver's to name (<code>console_sid</code>).</li>
+</ul>
+
+<h2 id="time">5. Time</h2>
+<p>In a real-time run a station keeps the host's time. In a virtual-time run the ether owns
+conductor time T and moves it only when every station is idle (§8), and a station keeps four
+promises:</p>
+<ul>
+<li><b>It reads time only through the C library or the radio library.</b> The time shim answers
+<code>clock_gettime</code>, <code>gettimeofday</code>, <code>time</code>, the sleeps,
+<code>setitimer</code> and the timeouts of <code>poll</code>, <code>select</code>,
+<code>epoll_wait</code>, <code>pthread_cond_timedwait</code> and
+<code>sem_timedwait</code>/<code>sem_clockwait</code> in node time. A raw <code>rdtsc</code>, a
+<code>clock_gettime</code> made by system call, or a wait none of those is does not move with
+the run.</li>
+<li><b>It opens its link early</b>, before anything in it waits on time:
+<code>simradio_station_open</code> is where its clock starts and the shim attaches; until the
+ether's welcome the monotonic clocks read 0 and the wall clocks the run's epoch.</li>
+<li><b>It says when it is idle, and until when.</b> Idle is every thread blocked; the
+<code>until</code> it reports is the earliest wake anything in it holds
+(<code>simradio_wake_at</code>). Either the host calls <code>simradio_idle()</code> itself — a
+scheduler's idle, with a wake at its next due tick and timer — or its driver sets
+<code>SIM_MESH_IDLE=threads</code> and the shim keeps a census of its threads. A station that
+says neither is reported idle by the radio library's watchdog, 20 ms of wall time after
+every message once none of its threads is on the CPU: it runs, but crawls.</li>
+<li><b>It reads its console and talks TCP to other stations through the C library</b>:
+<code>read</code> on descriptor 0, and <code>read</code>/<code>recv</code>/<code>send</code>/<code>write</code>
+on its sockets. The shim counts those bytes for the ether, which holds T until a station has
+read what it was sent. Input taken another way holds T a second of wall time each time.</li>
+</ul>
+
+<h2 id="driver">6. The driver</h2>
+
+<p>The driver is a Python module in the zip, imported by sim-mesh from the installed
+firmware's directory under a module name of its own. It <span class="must">must</span> define
+<code>DRIVER</code>, a subclass of its category's driver class (§7), which subclasses
+<code>sim_mesh.driver.Driver</code>. It <span class="must">must</span> import from sim-mesh only
+<code>sim_mesh.driver</code> and its category's module; anything else in sim-mesh may change
+under it. sim-mesh makes one <code>DRIVER(firmware)</code> per installed firmware a run uses,
+shared by its stations.</p>
+
+<h3>What a driver is given</h3>
+<p><code>self.firmware</code>: <code>dir</code>, <code>exec</code>, <code>fixed</code>,
+<code>env</code> (paths made absolute), <code>driver</code>, <code>name</code>/<code>firmware</code>,
+<code>base</code>, <code>arch</code>, <code>version</code>, <code>category</code>,
+<code>radio</code>, <code>title</code>, <code>hardware</code>. Every call names a
+<code>station</code>, which offers:</p>
+<table>
+<tbody>
+<tr><td><code>name</code>, <code>node_id</code></td><td>the node's name and its id</td></tr>
+<tr><td><code>dir</code>, <code>addr</code>, <code>ether_addr</code></td><td>its directory, loopback address, the ether</td></tr>
+<tr><td><code>board</code></td><td><code>SIM_MESH_BOARD</code>'s JSON, or None</td></tr>
+<tr><td><code>log_path</code></td><td>the file its console output is appended to</td></tr>
+<tr><td><code>status</code></td><td><code>stopped</code>, <code>starting</code>, <code>setup</code>, <code>up</code>, <code>restarting</code></td></tr>
+<tr><td><code>starts</code></td><td>how many times its process has been started</td></tr>
+<tr><td><code>virtual</code></td><td>True in a virtual-time run</td></tr>
+<tr><td><code>rpc</code></td><td>framed RPC on its console, or None before its process starts</td></tr>
+<tr><td><code>await sleep(s)</code></td><td>a wait on the run's clock (T in virtual time)</td></tr>
+<tr><td><code>await restart()</code></td><td>its process stopped, for the supervisor to start again</td></tr>
+<tr><td><code>report(event, **fields)</code></td><td>an event into the run's <code>events.jsonl</code> at the run's T</td></tr>
+</tbody>
+</table>
+<p>And from <code>sim_mesh.driver</code>: <code>CommandError</code> (anything that could not be done;
+its text is shown as it is), <code>run_tool(argv, timeout)</code> (a helper program to completion),
+<code>chip_dbm(board, connector_dbm)</code> (the chip power that puts that much at the connector
+through the board's front end), <code>parse_setting</code>, <code>UP</code>, and the framed RPC
+constants.</p>
+
+<h3>What a driver implements</h3>
+<table>
+<thead><tr><th>Method</th><th></th></tr></thead>
+<tbody>
+<tr><td><code>configured(station)</code></td><td><span class="must">required</span>: True when the station's directory shows it has been set up. sim-mesh samples it at the fork; a station not set up is set up once it is up</td></tr>
+<tr><td><code>async wait_up(station, timeout)</code></td><td><span class="must">required</span>: True once the station has booted and every service is up; False after <code>timeout</code> seconds of the run's clock</td></tr>
+<tr><td><code>argv(station)</code></td><td>the command line; <code>[exec]</code></td></tr>
+<tr><td><code>env(station)</code></td><td>what it adds to the environment; nothing</td></tr>
+<tr><td><code>sids(station)</code>, <code>console_sid(station)</code></td><td>the ether ids of its processes, and of the one reading the console; the node's own</td></tr>
+<tr><td><code>async run(station, line)</code></td><td>a line in the firmware's own language (a script's <code>exec</code>, <b>Run command</b>); what it said back</td></tr>
+<tr><td><code>async flush(station)</code></td><td>make what it was told durable, or apply it; asked after setup, before a stop, a reset or a snapshot</td></tr>
+<tr><td><code>web_port()</code></td><td>its web UI's port; None</td></tr>
+<tr><td><code>console_line(station, line)</code></td><td>a callback: each line the station prints, in order</td></tr>
+<tr><td><code>role_volatile</code></td><td>True for a firmware that forgets its role at a restart: the role its first-boot rules gave it is said again at every boot</td></tr>
+</tbody>
+</table>
+<p>Its helpers: <code>await self.pause(station, s)</code>, a wait on the run's clock;
+<code>await self.rpc_ready(station, timeout, marker_wait_s)</code> and
+<code>await self.rpc_query(station, line, timeout=None)</code>, framed RPC.</p>
+
+<h3>Framed RPC on the console</h3>
+<pre>
+station → sim-mesh   "… framed rpc v1"                        once, early in boot, as log text
+sim-mesh → station   F5 53 47 01 &lt;id&gt; &lt;len:2&gt; &lt;a command line&gt;
+station → sim-mesh   F5 53 47 01 &lt;id&gt; &lt;len:2&gt; &lt;what it printed&gt;
+</pre>
+<p>A firmware <span class="must">may</span> multiplex a framed side channel onto its console:
+a frame is never echoed and never enters its line editor, and sim-mesh takes each reply frame
+out of the stream, so the log and the console window never see one. One frame is in flight per
+station; a command line is at most 4096 bytes; the id is a hash of the command, so a retry
+carries the one it had.</p>
+
+<h2 id="reticulum">7. The <code>reticulum</code> category</h2>
+
+<p>A firmware of category <code>reticulum</code> is a Reticulum node. Its <code>DRIVER</code>
+subclasses <code>sim_mesh.reticulum.driver.ReticulumDriver</code> and implements these verbs,
+each taking the station first: every firmware's (<code>name</code>, <code>radio</code>,
+<code>radio_up</code>, <code>tx_power</code>, <code>diagnostics</code>, from
+<code>sim_mesh.driver.Driver</code>), then the category's. A verb it cannot do raises
+<code>CommandError</code> (<code>self.cannot(verb)</code>), which the default does. A script
+reaches the category's as <code>&lt;selection&gt;.reticulum.&lt;verb&gt;</code>, and they are
+nothing to a station of another category.</p>
+<table>
+<thead><tr><th>Verb</th><th>Means</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><code>name(name)</code></td><td>the node's name</td><td></td></tr>
+<tr><td><code>role(role)</code></td><td><code>transport</code> (forwards others' traffic) or <code>client</code></td><td></td></tr>
+<tr><td><code>radio(freq_mhz=, sf=, bw_khz=, cr=, tx_dbm=, sync=, preamble=)</code></td><td>slot 0's LoRa settings, only those given; <code>tx_dbm</code> at the antenna connector</td><td></td></tr>
+<tr><td><code>radio_up()</code></td><td>the radio started, for a firmware whose radio waits for it; nothing otherwise (default)</td><td></td></tr>
+<tr><td><code>tx_power(dbm)</code></td><td>transmit power at the connector</td><td></td></tr>
+<tr><td><code>path(dest=None, iface=None)</code></td><td></td><td>its path table, <code>[{dest, next_hop, iface, hops}]</code>: the entries for <code>dest</code> (32 hex digits) and on <code>iface</code> (as the firmware names it) when given, all without</td></tr>
+<tr><td><code>peer_tcp(addr, port)</code></td><td>a TCP link to another station</td><td></td></tr>
+<tr><td><code>current_role()</code></td><td></td><td><code>transport</code>, <code>client</code>, or None (default)</td></tr>
+<tr><td><code>diagnostics()</code></td><td></td><td>{label: text}, what a traffic run keeps of it; {} (default)</td></tr>
+<tr><td><code>lxmf.create(name)</code></td><td>one more LXMF identity, <code>name</code> its display name, unless the station has one by that name. <span class="must">Must not</span> refuse: a firmware with one identity, named after the node from its start, gives it <code>name</code>, and once it has another name does nothing</td><td>its delivery address, or None while it has none</td></tr>
+<tr><td><code>lxmf.identities()</code></td><td></td><td><code>[(name, delivery address)]</code>, the one it sends from unless told otherwise first; <code>[]</code> while it has none</td></tr>
+<tr><td><code>lxmf.announce(name=None)</code></td><td>an announce of that identity's delivery destination (None: the first)</td><td></td></tr>
+<tr><td><code>lxmf.send(dest, text, mid, sender=None)</code></td><td>an LXMF message to <code>dest</code> (32 hex digits) from its identity <code>sender</code> (None: the first); <code>mid</code> is sim-mesh's id for it</td><td></td></tr>
+</tbody>
+</table>
+
+<p>A verb with a dot is the method with an underscore: <code>lxmf.send</code> is
+<code>lxmf_send</code>.</p>
+
+<p><b>Events.</b> For every message <code>lxmf.send</code> was given, the driver
+<span class="must">must</span> report how it ended, under <code>mid</code>, from
+<code>console_line</code> or however else it learns it:</p>
+<pre>
+self.lxmf_status(station, mid, "delivered")
+self.lxmf_status(station, mid, "failed", why=&lt;text&gt;)
+</pre>
+<p>and <span class="must">may</span> report the statuses between (<code>pending</code>,
+<code>sent</code>); the last one reported is what a traffic report shows for a message that never
+arrived. Each is the event <code>lxmf.message.status</code> with <code>mid</code>,
+<code>status</code> and <code>why</code>. A firmware's own id for a message is coupled to
+<code>mid</code> with <code>self.lxmf_couple(station, mid, its_id)</code> once the driver learns
+it, and what the station says under its own id is given to
+<code>self.lxmf_native(station, its_id, status, why)</code>, which reports it under
+<code>mid</code>, holding it until the coupling is made; what goes wrong before the firmware has
+an id is reported under <code>mid</code> directly. sim-mesh writes each event as a line of the
+run's <code>events.jsonl</code>: <code>{"t": &lt;T in µs&gt;, "node": …, "event": …, …fields}</code>.</p>
+
+<h2 id="ether">8. The ether's protocol</h2>
+
+<p>The ether is the medium between stations: it decides who hears each frame, from the run's
+loss tables, and in a virtual-time run it owns time. A station speaks to it over UDP, one JSON
+object per datagram, from a socket bound to its own address; payloads are base64, times in
+microseconds. The virtual radio (§9) speaks it for a firmware; a firmware
+<span class="must">may</span> speak it itself.</p>
+
+<p>A real-time run:</p>
+<pre>
+station → ether   hello {sid, slots}
+ether → station   welcome {t, mode: "real", rate: 1, epoch, seed}
+station → ether   state {slot, mode, mod, freq, bw, sf, cr, sync, hdr, crc, pre}   on every change
+station → ether   tx {slot, id, t0, t_pre, t_hdr, t_end, power_dbm, mod, freq, bw, sf, …, payload}
+ether → station   rx_begin {slot, id, t0, t_pre, t_hdr, t_end, level[, cad]}    each receiver it reaches
+ether → station   rx_end {slot, id, verdict, payload, rssi, snr}               at the frame's end
+</pre>
+<p>A virtual-time run is the same conversation with the ether as conductor:</p>
+<pre>
+station → ether   hello {sid, slots}
+ether → station   welcome {t, mode: "virtual", rate, epoch, seed, seq: 1}
+station → ether   idle {seq: 1, until: 25000}            nothing to do before T 25 000
+ether → station   run {t: 25000, seq: 2}                 every station idle; T moves to 25 000
+station → ether   state {…}  tx {t0: 25000, …}           what it did at 25 000
+station → ether   idle {seq: 2, until: 30000}
+ether → station   rx_begin {t: 25000, seq: 7, …}         to each receiver, at the same T
+receiver → ether  idle {seq: 7, until: …}
+</pre>
+
+<table>
+<thead><tr><th>Station → ether</th><th>Says</th></tr></thead>
+<tbody>
+<tr><td><code>hello</code></td><td>this station exists, and which radio slots it has</td></tr>
+<tr><td><code>state</code></td><td>a slot's mode (<code>RX</code>, <code>TX</code>, <code>CAD</code>, <code>STDBY_RC</code>, <code>SLEEP</code> …), its modulation <code>mod</code> and its carrier: the ether matches receivers on these</td></tr>
+<tr><td><code>tx</code></td><td>a transmission: its modulation and carrier, its power at the connector, its instants (start, end of preamble, of header, end), its payload</td></tr>
+<tr><td><code>idle</code></td><td>virtual time: done with everything message <code>seq</code> gave it; next needs to run at T <code>until</code> (null: not on its own)</td></tr>
+<tr><td><code>read</code>, <code>wrote</code>, <code>listen</code></td><td>virtual time: bytes taken from its console or from another station over TCP, about to be written to one (with <code>go</code>: waits for the ether's <code>go</code>), and a TCP endpoint it listens on — the time shim sends these</td></tr>
+</tbody>
+</table>
+<table>
+<thead><tr><th>Ether → station</th><th>Says</th></tr></thead>
+<tbody>
+<tr><td><code>welcome</code></td><td>joined: <code>t</code>, <code>mode</code> (<code>real</code> or <code>virtual</code>), <code>rate</code>, <code>epoch</code>, <code>seed</code></td></tr>
+<tr><td><code>rx_begin</code></td><td>a frame is arriving: its instants and its level; <code>cad: true</code> when it is energy to this station, not a frame to demodulate</td></tr>
+<tr><td><code>rx_end</code></td><td>that frame is over: the verdict (<code>clean</code>, <code>crc</code>), the payload, RSSI and SNR</td></tr>
+<tr><td><code>run</code></td><td>virtual time: T has reached what this station asked for, or it has input to work on</td></tr>
+<tr><td><code>go</code></td><td>virtual time: a TCP write asked for may go ahead</td></tr>
+</tbody>
+</table>
+<ul>
+<li><b><code>mod</code></b> is the modulation; a receiver hears only a frame in its own. The ether
+models <code>lora</code> (with <code>bw</code>, <code>sf</code>, <code>cr</code>, <code>sync</code>,
+<code>hdr</code>, <code>crc</code>, <code>pre</code>); a <code>state</code> or <code>tx</code> naming another
+is refused. It does not model preamble length.</li>
+<li>The <code>id</code> in a <code>tx</code> is the transmitter's own count; in <code>rx_begin</code> and
+<code>rx_end</code> it is the ether's, unique across stations.</li>
+<li><b>Virtual time.</b> Every message the ether sends carries <code>t</code> and <code>seq</code>; the
+station applies it at that T and answers with an <code>idle</code> for that <code>seq</code>, and messages
+are applied strictly in <code>seq</code> order, never twice. T moves only when every station is idle,
+to the earliest of their <code>until</code>s and the air's next instant. An idle is said again every
+250 ms of wall time until something comes back; the ether answers an idle for an older
+<code>seq</code> said twice by sending what came after it again. A station that says
+<code>hello</code> again has restarted.</li>
+<li>Unknown message types are ignored, on both sides.</li>
+</ul>
+
+<h2 id="radio">9. The virtual radio</h2>
+
+<p>A virtual radio is a model of one radio chip on a virtual SPI bus, and the station's link to
+the ether, as a shared library sim-mesh provides: <code>libsimradio-sx1262.so</code> is the
+SX1262. A firmware is compiled against its header, <code>radio/include/simradio.h</code> in
+sim-mesh's tree, and linked with it <b>by name</b> (<code>-lsimradio-sx1262</code>), and
+<span class="must">must not</span> carry it: sim-mesh puts its own on the station's
+<code>LD_LIBRARY_PATH</code>, so a firmware keeps working when the model or the ether's protocol
+changes, and only a change to <code>simradio.h</code> itself needs it rebuilt. It makes the
+simulation and the hardware do the same thing: the firmware's own driver talks SPI to it frame by
+frame, exactly as to the chip on a board.</p>
+
+<pre>
+int  simradio_station_open(int sid, const char *bind_addr, const char *ether_addr);  /* once, early */
+simradio_t *simradio_open(int slot, void (*on_pin)(void *ctx, int pin, int level), void *ctx);
+void simradio_transfer(simradio_t *, const uint8_t *out, size_t len, uint8_t *in);    /* one NSS cycle */
+void simradio_reset(simradio_t *);                                                    /* RST's rising edge */
+int  simradio_pin(simradio_t *, int pin);                    /* SIMRADIO_PIN_DIO1, SIMRADIO_PIN_BUSY */
+void simradio_set_services(const struct simradio_services *); /* a host's own, before anything else */
+
+int     simradio_virtual(void);          int64_t simradio_node_us(void);
+int     simradio_joined(void);           int64_t simradio_node_at_join(void);
+int64_t simradio_epoch_us(void);         int64_t simradio_node_to_conductor(int64_t node_us);
+int     simradio_wake_create(void (*due)(void *), void *arg);
+void    simradio_wake_at(int wake, int64_t node_us);           /* INT64_MAX clears it */
+void    simradio_idle(void);
+void    simradio_on_advance(void (*moved)(void));
+</pre>
+
+<ul>
+<li><b>Open the link once, early</b>: <code>simradio_station_open(SIM_MESH_NODE_ID,
+SIM_MESH_BIND_ADDR, SIM_MESH_ETHER)</code>, before anything waits on time (§5); then
+<code>simradio_open(slot, …)</code> per radio.</li>
+<li><b>One whole frame per NSS cycle.</b> A bus adapter hands the model everything the driver put
+on the bus between NSS going low and going high as one frame: writes inside a frame are appended,
+never passed on one by one; a frame containing a read is complete at the read; the adapter never
+adds a NOP of its own. A reassembly one byte off makes <code>GetIrqStatus</code> read the status
+byte as the IRQ word's high byte, so every flag looks set.</li>
+<li><b>Interrupts.</b> <code>on_pin</code> runs on whatever thread moved the line. A pin shim whose
+interrupt is level-triggered <span class="must">must</span> fire at once when the interrupt is
+enabled while the line is asserted: a driver that disables its interrupt, drains, and re-enables
+relies on a line still high re-firing.</li>
+<li><b>The host's services.</b> The library needs a clock, one-shot timers, a recursive lock, a UDP
+socket and a thread to read it, and a log (<code>struct simradio_services</code> in the header).
+Its own are a plain process's threads; a host with a scheduler of its own (FreeRTOS on ESP-IDF's
+Linux target) <span class="must">must</span> hand it its own with <code>simradio_set_services</code>
+before any other call — a constructor is the place — so model callbacks run as that host's
+tasks.</li>
+<li><b>The front end</b> is the library's: what the chip radiates goes through
+<code>SIM_MESH_BOARD</code>'s transmit curve before the ether is told its power, and every level
+the chip reads is the front end's receive gain above the connector's. A firmware that drives a
+front end converts with the same figures.</li>
+</ul>
+
+<h2 id="building">10. Building against it</h2>
+
+<p>Start sim-mesh once first (<code>sim</code>, which builds its radio and leaves
+<code>radio/build/libsimradio-sx1262.so</code>), then build the station for Linux:</p>
+<pre>
+# C or C++
+cc station.c -I sim-mesh/radio/include -L sim-mesh/radio/build -lsimradio-sx1262 -lpthread -o station
+
+# Rust: link it by name from a build script
+println!("cargo:rustc-link-search=native={}/build", radio_dir);
+println!("cargo:rustc-link-lib=dylib=simradio-sx1262");
+
+# PlatformIO on Portduino: sim-mesh's radio/portduino library, in lib_deps as
+#   symlink://<path to sim-mesh>/radio/portduino
+# links the radio by name and stands in for spidev and libgpiod
+</pre>
+<p>Then make the zip: the executable, the driver, anything else it runs, the shared libraries
+beyond the C library and C++ runtime under <code>lib/</code>, and <code>node.yaml</code>. Check what
+the executable loads with <code>ldd</code>: everything but <code>libc</code>, <code>libm</code>,
+<code>libstdc++</code>, <code>libgcc_s</code>, the loader and <code>libsimradio-*</code> belongs in
+<code>lib/</code>. Then <code>sim firmware add</code> it, and run a script with it.</p>
+
+<p>A firmware that publishes its zips puts them on <a href="{{ '/firmware/' | relative_url }}">the
+pre-built list</a> with sim-mesh's <code>tools/deploy-firmware</code>.</p>
+
+<h2 id="example">11. A whole example</h2>
+
+<p><code>node.yaml</code>:</p>
+<pre>
+base: relay-sx1262
+arch: aarch64
+version: '20261001120000'
+category: reticulum
+radio: sx1262
+title: Relay (dev)
+hardware: ESP32-S3
+exec: relay
+driver: driver.py
+fixed: fixed
+env:
+  LD_LIBRARY_PATH: ./lib
+</pre>
+<p><code>driver.py</code>, for a firmware that answers framed RPC on its console:</p>
+<pre>
+import os
+import re
+
+from sim_mesh.reticulum.driver import ReticulumDriver
+
+QUEUED = re.compile(r"queued (\S+)")
+MID = re.compile(r"mid=(\S+)")
+
+
+class Relay(ReticulumDriver):
+    def configured(self, station):
+        return os.path.exists(os.path.join(station.dir, "state", "boot"))
+
+    async def wait_up(self, station, timeout):
+        return await self.rpc_ready(station, timeout, 20.0)
+
+    async def run(self, station, line, timeout=None):
+        return await self.rpc_query(station, line, timeout)
+
+    async def name(self, station, name):
+        await self.run(station, "hostname %s" % name)
+
+    async def lxmf_create(self, station, name):
+        return None                 # one identity, there from its start
+
+    async def lxmf_identities(self, station):
+        address = (await self.run(station, "address")).strip()
+        return [(station.name, address)] if address else []
+
+    async def lxmf_announce(self, station, name=None):
+        await self.run(station, "announce")
+
+    async def lxmf_send(self, station, dest, text, mid, sender=None):
+        found = QUEUED.search(await self.run(station, "send %s %s" % (dest, text)))
+        if not found:
+            self.lxmf_status(station, mid, "failed", "not queued")
+            return
+        self.lxmf_couple(station, mid, found.group(1))
+
+    def console_line(self, station, line):
+        found = MID.search(line)
+        if found and "delivered" in line:
+            self.lxmf_native(station, found.group(1), "delivered")
+        elif found and "failed" in line:
+            self.lxmf_native(station, found.group(1), "failed", line)
+
+
+DRIVER = Relay
+</pre>
+</div>

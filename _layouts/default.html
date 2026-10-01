@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.url != "/" %}{{ page.title }} — {{ site.title }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>
+<meta name="description" content="{{ page.description | default: site.description | strip_newlines }}">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap">
+<link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="logo" href="{{ '/' | relative_url }}">{{ site.title | downcase }}<span class="dot">.</span></a>
+    <nav>
+      <ul>
+        {%- for item in site.nav %}
+        <li><a href="{{ item.url | relative_url }}"{% if page.url == item.url %} aria-current="page"{% endif %}>{{ item.name }}</a></li>
+        {%- endfor %}
+        <li><a href="{{ site.github_org }}">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+{%- if page.url == "/" %}
+<div class="wrap">
+  <div class="intro">
+    <p>{{ page.hero | default: site.description | strip_newlines }}</p>
+    <p class="tagline">{{ site.tagline }}</p>
+  </div>
+</div>
+{%- endif %}
+
+<div class="site-main">
+  <div class="wrap">
+    <div class="docs-grid{% if page.url != '/' %} has-sidebar{% endif %}">
+
+      {%- if page.url != "/" %}
+      <aside class="section-nav">
+        <h4>{{ site.title }}</h4>
+        <ul>
+          <li><a href="{{ '/' | relative_url }}">Home</a></li>
+          {%- for item in site.nav %}
+          <li><a href="{{ item.url | relative_url }}"{% if page.url == item.url %} aria-current="page"{% endif %}>{{ item.name }}</a></li>
+          {%- endfor %}
+        </ul>
+      </aside>
+      {%- endif %}
+
+      <article>
+        {%- if page.url != "/" %}
+        <h1>{{ page.title }}</h1>
+        {%- endif %}
+        {{ content }}
+      </article>
+
+    </div>
+  </div>
+</div>
+
+<footer class="sitefoot">
+  <div class="wrap">
+    <p>{{ site.title }} — <a href="{{ site.github_org }}">source on GitHub</a>. Apache 2.0.</p>
+    <p>Alpha software, moving fast. Contact <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" hidden><img src="" alt=""></div>
+<script>
+(function(){
+  var box=document.getElementById("lightbox"),full=box.firstElementChild;
+  document.addEventListener("click",function(e){
+    var shot=e.target.closest(".shot button");
+    if(shot){
+      var img=shot.querySelector("img");
+      full.src=img.currentSrc||img.src;
+      full.alt=img.alt;
+      box.hidden=false;
+    }else if(!box.hidden){
+      box.hidden=true;
+    }
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape")box.hidden=true;
+  });
+})();
+</script>
+
+</body>
+</html>

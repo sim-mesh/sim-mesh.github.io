@@ -1,0 +1,52 @@
+title: sim-mesh
+tagline: Real mesh firmware, a simulated radio, real ground
+description: >-
+  sim-mesh runs real LoRa mesh firmware, built as Linux processes, over a
+  model of the radio chip and one medium that decides who hears what from the
+  ground they stand on, in real time or in virtual time.
+email: rop@gonggri.jp
+github_org: https://github.com/sim-mesh
+
+# The site's own domain. Jekyll builds `absolute_url` — the canonical link and
+# every entry in the sitemap — from this. Which host the deploy answers on is
+# the repo's Pages setting; see README, "The domain".
+url: https://sim-mesh.net
+baseurl: ""
+
+nav:
+  - name: Getting started
+    url: /getting-started/
+  - name: Firmware
+    url: /using-firmware/
+  - name: Pre-built
+    url: /firmware/
+  - name: Networks
+    url: /networks/
+  - name: Scripts
+    url: /scripts/
+  - name: Firmware contract
+    url: /contract/
+
+permalink: pretty
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  hard_wrap: false
+
+plugins:
+  - jekyll-sitemap
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  # /firmware/ is laid in by .github/workflows/pages.yml after Jekyll has run:
+  # the `firmware` release of sim-mesh/sim-mesh, its zips and index.html.
