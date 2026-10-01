@@ -1,7 +1,8 @@
-# sim-mesh.github.io
+# sim-mesh.net
 
 The site at **[sim-mesh.net](https://sim-mesh.net/)**: sim-mesh's pages, the
-firmware contract, and the pre-built firmware.
+firmware contract, and the pre-built firmware. Its repository on GitHub is
+sim-mesh/sim-mesh.github.io, as GitHub Pages names an organisation's site.
 
 ```
 this repo (Jekyll pages) ──┐
