@@ -17,7 +17,7 @@ sim-mesh/sim-mesh, release `firmware` ──► /firmware/
 | `using-firmware.md` | names, categories, adding and deleting, choosing in a script |
 | `networks.md` | geodata, nodesets, antennas, who hears whom, time |
 | `scripts.md` | the script library |
-| `contract.html` | the firmware contract: the zip, node.yaml, the environment, time, the driver, the `reticulum` verbs, the ether's protocol, the virtual radio |
+| `contract.md` | the firmware contract: the zip, node.yaml, the environment, time, the driver, the `reticulum` verbs, the ether's protocol, the virtual radio; sim-mesh's README section *The firmware contract*, its headings a level up and its links into the repository made absolute |
 
 `/firmware/` is not in this repo: the deploy copies the `firmware` release of
 sim-mesh/sim-mesh there — every pre-built zip, `firmware.yaml` and the
