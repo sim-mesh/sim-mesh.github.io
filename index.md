@@ -1,6 +1,6 @@
 ---
 title: Home
-hero: Real mesh firmware, many nodes, one simulated sky.
+hero: Real mesh firmware, many nodes, one simulated ether.
 description: >-
   sim-mesh runs real LoRa mesh firmware, built as Linux processes, over a
   model of the radio chip and one medium that decides who hears what from the
@@ -23,7 +23,7 @@ seed.
 <ul class="cards">
 <li><a href="{{ '/getting-started/' | relative_url }}"><b>Get started</b><span>Clone, start, add firmware, run a script. Docker or Podman is all it needs.</span></a></li>
 <li><a href="{{ '/firmware/' | relative_url }}"><b>Pre-built firmware</b><span>Station builds ready to add, for aarch64 and x86_64.</span></a></li>
-<li><a href="{{ '/using-firmware/#building-firmware-for-sim-mesh' | relative_url }}"><b>Bring your firmware</b><span>The zip, its driver, the ether's protocol and the virtual radio, specified.</span></a></li>
+<li><a href="{{ '/using-firmware/building/' | relative_url }}"><b>Bring your firmware</b><span>The zip, its driver, the ether's protocol and the virtual radio, specified.</span></a></li>
 </ul>
 
 ## What it is made of

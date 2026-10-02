@@ -14,7 +14,8 @@ sim-mesh/sim-mesh, release `firmware` ──► /firmware/
 |---|---|
 | `index.md` | what sim-mesh is |
 | `getting-started.md` | clone, start, add firmware, a first simulation |
-| `using-firmware.md` | names, categories, adding and deleting, pre-built; then *Building firmware for sim-mesh*: sim-mesh's README section *The firmware contract*, its headings a level down and its links into the repository made absolute |
+| `using-firmware.md` | names, categories, adding and deleting, pre-built |
+| `using-firmware/building.md` | building firmware for sim-mesh: sim-mesh's README section *The firmware contract*, its headings a level up and its links into the repository made absolute |
 | `simulation.md` | a chapter per app tab, in the app's order: firmware, antennas, geodata, nodes, scripts, simulations (who hears whom, time) |
 | `simulation/scripting.md` | the script library: every firmware's commands, then each category's |
 

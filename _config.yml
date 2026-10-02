@@ -18,6 +18,9 @@ nav:
     url: /getting-started/
   - name: Firmware
     url: /using-firmware/
+    children:
+      - name: Building firmware
+        url: /using-firmware/building/
   - name: Pre-built
     url: /firmware/
   - name: Simulation
