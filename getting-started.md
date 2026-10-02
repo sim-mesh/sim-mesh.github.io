@@ -51,7 +51,7 @@ No geodata and no nodesets come with sim-mesh: both are your own. Make
 ground on the **Geodata** tab — **Build from sources…** over a rectangle of
 the map, or **New synthetic…** — and click it to choose it. On the **Nodes**
 tab place nodes on it, or **Import…** them in the Layers panel from a public
-node map, and **Save nodes as nodeset…**. [Networks]({{ '/networks/' | relative_url }})
+node map, and **Save nodes as nodeset…**. [Simulation]({{ '/simulation/' | relative_url }})
 says what each of those is.
 
 ## 5. A first simulation

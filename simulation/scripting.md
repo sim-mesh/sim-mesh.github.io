@@ -1,5 +1,8 @@
 ---
-title: Scripts
+title: Scripting
+permalink: /simulation/scripting/
+redirect_from:
+  - /scripts/
 description: Plain Python that says what a simulation's nodes run and what is done to them.
 ---
 
@@ -75,16 +78,52 @@ done to each of its nodes:
 - `.up()`, `.exec(lines)` (macros filled in: `{name}`, `{id}`, `{addr}`,
   `{addr:<node>}`, `{max_dbm}`), `.reset()`, `.factory_reset()`,
   `.move(lat, lon)`, `.facts()`.
-- `.radio(…)`, `.radio_up()` — every firmware's.
-- `.reticulum.role(role)`, `.reticulum.path(to=, dest_hash=, iface=)` (the
-  path table, or what of it is asked for), and LXMF's:
-  `.reticulum.lxmf.create(name=)`, `.identities()`, `.announce()`,
-  `.send(to, text)` to a node or an LXMF identity by name. A command under
-  `.reticulum` is for a selection's Reticulum nodes and nothing to the
-  others.
 
 Every command that acts takes `after=` (seconds on the run's clock) and
 `wait=False` (a future, at once); a firmware's commands take `spread=` too.
+
+## Choosing the firmware
+
+A script asks for its firmware as an input, and the Scripts tab shows a
+dropdown for it above the script, offering the installed firmware of the
+category the script needs:
+
+```python
+firmware = script_input("firmware", type=Firmware, category="reticulum",
+                        label="Firmware for nodes not otherwise configured")
+nodes().firmware(firmware)
+```
+
+From a shell, `sim run lxmf-traffic … --set firmware=relay-sx1262_latest`.
+A run keeps what each name resolved to.
+
+## Every firmware's commands
+
+A firmware's commands are done by each node's driver, its own way. These
+every driver answers, whatever its category:
+
+| Command | Does |
+|---|---|
+| `.radio(freq_mhz=, sf=, bw_khz=, cr=, tx_dbm=, sync=, preamble=)` | slot 0's LoRa settings, only those given; `tx_dbm` at the antenna connector, `"max"` each node's own maximum |
+| `.radio_up()` | the radio started, for a firmware whose radio waits for it |
+
+## Reticulum commands
+
+Under `.reticulum`, for a selection's nodes of category `reticulum` and
+nothing to the others:
+
+| Command | Does | Returns |
+|---|---|---|
+| `.reticulum.role(role)` | `transport` (forwards others' traffic) or `client` | |
+| `.reticulum.path(to=, dest_hash=, iface=)` | | each node's path table, `[{dest, next_hop, iface, hops}]`: to a node or LXMF identity, a destination, on an interface, or all of it |
+| `.reticulum.lxmf.create(name=)` | one more LXMF identity, named after the node unless `name` says otherwise, unless it has one by that name | `{node: its address}` |
+| `.reticulum.lxmf.identities()` | | each node's `[(name, address)]`, the one it sends from first |
+| `.reticulum.lxmf.announce(name=)` | an announce of that identity's delivery destination (none named: the first) | |
+| `.reticulum.lxmf.send(to, text, sender=)` | an LXMF message to a node or an LXMF identity by name, from the identity `sender` (none named: the first) | `{node: the message's id}` |
+
+What became of each message the driver reports as the event
+`lxmf.message.status` under that id: `pending`, `sent`, `delivered` or
+`failed`, with why.
 
 ## Running one
 

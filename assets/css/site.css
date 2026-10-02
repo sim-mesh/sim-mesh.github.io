@@ -111,7 +111,7 @@ em,i{font-style:italic}
   box-shadow:inset 0 1px 3px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.1);
   text-shadow:0 1px 3px rgba(0,0,0,.5);
 }
-.masthead nav a[aria-current="page"]{
+.masthead nav a[aria-current]{
   background-color:var(--link);
   color:#222;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 5px rgba(0,0,0,.5);
@@ -164,6 +164,7 @@ em,i{font-style:italic}
 }
 .section-nav ul{list-style:none;margin:0;padding:0}
 .section-nav li{margin:0 0 2px}
+.section-nav li ul{margin:2px 0 0 14px;font-size:.85em}
 .section-nav a{
   display:block;
   padding:5px 10px;
@@ -280,6 +281,20 @@ th{font-weight:900;text-transform:uppercase;font-size:.8em;letter-spacing:.06em;
 .note.warning::before{border-color:transparent var(--warn-dark) var(--warn-dark) transparent}
 @media (max-width:568px){.note{margin-left:0;border-radius:5px}.note::before{display:none}}
 
+/* ---------- box diagrams (inline SVG) ---------- */
+.diagram{margin:0 0 1em}
+.diagram svg{display:block;width:100%;height:auto;text-shadow:none}
+.diagram .box{fill:var(--code-bg);stroke:var(--rule);stroke-width:1.5}
+.diagram .part{fill:var(--card);stroke:var(--rule)}
+.diagram .links path{fill:none;stroke:var(--ink-dim);stroke-width:2}
+.diagram .head{fill:var(--ink-dim)}
+.diagram text{text-anchor:middle;font-family:inherit;fill:var(--ink)}
+.diagram .name{font-size:19px;font-weight:700;fill:var(--ink-bright)}
+.diagram .desc{font-size:15px}
+.diagram .strong{font-weight:700;fill:var(--ink-bright)}
+.diagram .left{text-anchor:start}
+.diagram .note{font-size:13px;fill:var(--ink-dim)}
+
 /* ---------- cards ---------- */
 .cards{
   list-style:none;
@@ -365,3 +380,4 @@ th{font-weight:900;text-transform:uppercase;font-size:.8em;letter-spacing:.06em;
 .sitefoot a{color:var(--ink)}
 .sitefoot a:hover{color:var(--link)}
 .sitefoot p{margin:0 0 6px}
+.sitefoot .fineprint{font-size:.75em}
