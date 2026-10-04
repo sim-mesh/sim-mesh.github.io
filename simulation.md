@@ -52,9 +52,11 @@ for each part of it:
 | | Where | From |
 |---|---|---|
 | terrain and clutter | Berlin | its DGM1 and bDOM (1 m) |
+| | Brandenburg | its DGM (1 m) and bDOM (0.2 m) |
+| | Mecklenburg-Vorpommern | its DGM1 and DOM1 (1 m lidar) |
 | | the Netherlands | AHN (0.5 m lidar) |
 | | everywhere else | Copernicus GLO-30 |
-| buildings | Berlin | its LoD2 models |
+| buildings | Berlin, Brandenburg, Mecklenburg-Vorpommern | their LoD2 models |
 | | the Netherlands | 3DBAG |
 | | everywhere else | OpenStreetMap |
 | population | Germany | the Zensus 2022 grid |
