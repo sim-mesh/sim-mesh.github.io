@@ -62,6 +62,18 @@ A geodata goes from one machine to another as a zip, **Export zip** and
 **Import zip…**; a bare planner pack imports too. Nodes are never part of
 the ground: they belong to nodesets.
 
+**Pre-built ground** comes from an **index**: one YAML file listing geodata
+packs and nodesets, each by its sha256, so ground meant for comparable tests
+is the same bytes on every machine. sim-mesh's own index, `sim-mesh-examples`,
+is at [sim-mesh.net/examples/index.yaml]({{ '/examples/index.yaml' | relative_url }}):
+reference environments for comparing mesh protocols and firmware versions,
+as well as for showing sim-mesh. Anyone
+can publish another, a directory holding an `index.yaml` and its files, and
+**Add index…** lists it. The **Geodata** tab has three sections: the
+installed geodata, each with its size, what the indexes offer under
+**Download pre-built geodata packs**, and the build's sources with what each holds
+in the cache.
+
 ## Nodes
 
 Which nodes stand where — latitude, longitude, height above the ground — with
@@ -75,8 +87,12 @@ Every node is one board, an SX1262: at 22 dBm or below a bare chip, above it
 is told its board when its station starts.
 
 **Importing** makes a nodeset of the nodes inside the geodata's extent from
-the MeshCore map, a PotatoMesh instance, planner sites or a deployed-network
-CSV, each node tagged with its source, its kind and how good its position is.
+the MeshCore map, a PotatoMesh instance, planner sites, a deployed-network
+CSV, any CSV whose columns the dialog asks to be named, GeoJSON points, KML
+placemarks, GPX waypoints or a Meshtastic node list, each node tagged with
+its source. **Nodesets…** in the Layers panel lists every nodeset with its
+size, and what the indexes offer; a nodeset from an index brings the
+geodata it is made for.
 
 ## Scripts
 
@@ -86,10 +102,14 @@ has the library, the commands and the scripts that come with sim-mesh.
 
 ## Simulations
 
-The **Simulations** tab lists every simulation — running, paused or ended —
-with its nodeset, geodata and script, its pace and time, and how many of its
-stations are up; clicking a running one opens its live map, where the same
-edits as on the Nodes tab go to the run's own copy of its nodeset.
+The **Simulations** tab lists every simulation — running, paused, done or
+ended — with its nodeset, geodata and script, its pace and time, how many of
+its stations are up and its size on disk; **done** is one its script paused
+when it was finished, **paused** one a person paused, and both resume.
+Play, pause, stop and delete are icons on each row, and checkboxes choose
+several rows for Stop, Pause and Delete at once. Clicking a running one
+opens its live map, where the same edits as on the Nodes tab go to the
+run's own copy of its nodeset.
 
 ### Who hears whom
 

@@ -47,11 +47,13 @@ sim-mesh/sim firmware list
 
 ## 4. Ground and nodes
 
-No geodata and no nodesets come with sim-mesh: both are your own. Make
-ground on the **Geodata** tab — **Build from sources…** over a rectangle of
-the map, or **New synthetic…** — and click it to choose it. On the **Nodes**
-tab place nodes on it, or **Import…** them in the Layers panel from a public
-node map, and **Save nodes as nodeset…**. [Simulation]({{ '/simulation/' | relative_url }})
+Geodata and nodesets are fetched from an index or made here. On the
+**Geodata** tab, **Download pre-built geodata packs** lists what sim-mesh's own
+index and any you add offer, and **Add** installs one; or make ground —
+**Build…** over a rectangle of the map, or **New synthetic…** — and click it
+to choose it. On the **Nodes** tab place nodes on it, **Import…** them in
+the Layers panel from a public node map or a file, or fetch a nodeset under
+**Nodesets…**, and **Save nodes as nodeset…**. [Simulation]({{ '/simulation/' | relative_url }})
 says what each of those is.
 
 ## 5. A first simulation

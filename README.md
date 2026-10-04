@@ -18,6 +18,7 @@ sim-mesh/sim-mesh, release `firmware` ──► /firmware/
 | `using-firmware/building.md` | building firmware for sim-mesh: sim-mesh's README section *The firmware contract*, its headings a level up and its links into the repository made absolute |
 | `simulation.md` | a chapter per app tab, in the app's order: firmware, antennas, geodata, nodes, scripts, simulations (who hears whom, time) |
 | `simulation/scripting.md` | the script library: every firmware's commands, then each category's |
+| `examples/index.yaml` | sim-mesh's own index, `sim-mesh-examples`: the geodata packs and nodesets every sim-mesh lists, each by its sha256, the packs as release assets of sim-mesh/sim-mesh, and the text the page and `sim index list` print about them |
 
 `_config.yml`'s `nav` is both the masthead and the sidebar; an entry's
 `children` are sub-pages, listed under it in the sidebar. Pages that moved

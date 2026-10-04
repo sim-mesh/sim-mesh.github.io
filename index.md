@@ -79,7 +79,7 @@ them and builds geodata packs from public data. Around them are the things sim-m
 
 - **firmware** — station builds, each a zip with its own driver, installed
   from a file or from [the pre-built ones]({{ '/firmware/' | relative_url }});
-- **geodata** — the ground, a pack built from public sources or synthetic;
+- **geodata** — the ground, a pack fetched pre-built from an index or built from public sources, or synthetic;
 - **nodesets** — which nodes stand where, with what antenna and power;
 - **scripts** — plain Python that says what each node runs and what is done;
 - **runs** and **snapshots** — what a simulation did, and moments of it to

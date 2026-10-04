@@ -1,0 +1,15 @@
+# sim-mesh's own index: the geodata packs and nodesets every sim-mesh lists
+# as sim-mesh-examples (testbed/indexes.py; sim-mesh's README, "Indexes").
+# An entry is immutable: its sha256 is what it is, and a changed pack or
+# nodeset is published under a new name. Entries are added by
+# `sim geodata publish` and `sim nodeset publish`, which upload the files to
+# the release below and append the entry here.
+index: sim-mesh-examples
+title: sim-mesh examples
+description: |
+  These examples will soon include some varied geographies and nodesets.
+  Apart from demonstrating sim-mesh, they can also be used as reference
+  environments to compare different mesh protocols and/or firmware versions.
+release: sim-mesh/sim-mesh:examples
+geodata: []
+nodesets: []
