@@ -11,5 +11,14 @@ description: |
   Apart from demonstrating sim-mesh, they can also be used as reference
   environments to compare different mesh protocols and/or firmware versions.
 release: sim-mesh/sim-mesh:examples
-geodata: []
+geodata:
+  - name: berlin-centre
+    title: Berlin centre, dense flat city, 10 m
+    description: "About 15 × 12 km of central Berlin at 10 m: Berlin's own 1 m terrain, surface and LoD2 buildings, with OpenStreetMap, WorldCover and the 2022 census."
+    url: https://github.com/sim-mesh/sim-mesh/releases/download/examples/berlin-centre.zip
+    sha256: c1d4a7e38fa02e09540cd0dfd2aa3942604e1ddae0a29c47c56bd1c5e29ebd03
+    bytes: 52762839
+    bbox: [13.2688, 52.4511, 13.4898, 52.5605]
+    licences: Copernicus GLO-30 DSM; Berlin DGM1 + bDOM (1 m); Berlin LoD2 3D building models; Zensus 2022 100 m population grid; ESA WorldCover 10 m (2021, v200); OpenStreetMap roads/rail; OpenStreetMap places/streets/postal codes
+    tags: [city, flat, "10m"]
 nodesets: []
