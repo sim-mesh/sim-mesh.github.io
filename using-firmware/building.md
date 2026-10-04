@@ -71,7 +71,7 @@ A YAML mapping at the archive's root.
 | `base` | yes | as in the name |
 | `arch` | yes | as in the name |
 | `version` | yes | as in the name, a string |
-| `category` | yes | the driver interface its driver implements, and so the verbs it answers: `reticulum` (§7); `meshcore`, `meshtastic` to come |
+| `category` | yes | the driver interface its driver implements, and so the verbs it answers: `reticulum` (§7), `meshcore` (§7a); `meshtastic` to come |
 | `exec` | yes | the executable's path in the archive |
 | `driver` | yes | the driver's path in the archive, a Python file (§6) |
 | `radio` | no | the virtual radio it is linked with, by the library's name: `sx1262` is `libsimradio-sx1262.so` (§9). Absent: sim-mesh provides none, and the station speaks the ether's protocol itself (§8) or has no radio |
@@ -306,6 +306,56 @@ the station says under its own id is given to
 firmware has an id is reported under `mid` directly. sim-mesh writes each
 event as a line of the run's `events.jsonl`:
 `{"t": <T in µs>, "node": …, "event": …, …fields}`.
+
+## 7a. The `meshcore` category
+
+```
+script ── node(n).meshcore.msg(to, text) ──► simd: mid ──► msg(dest, text, mid) ──► station
+sender ── sent, acknowledged ──► its driver ──► msg.status {mid, status}
+receiver ── the message, mid in its text ──► its driver ──► msg.received {mid, text, sender | chan}
+```
+
+A firmware of category `meshcore` is a MeshCore node: a companion, which a
+person drives through meshcore-cli, a repeater or a room server. Its
+`DRIVER` subclasses `sim_mesh.meshcore.driver.MeshcoreDriver` and implements
+every firmware's verbs and the category's, each taking the station first; a
+verb it cannot do raises `CommandError` (`self.cannot(verb)`), which the
+default does. A script reaches them as `<selection>.meshcore.<verb>`. They
+carry meshcore-cli's command names and mean what those commands mean; they
+are not shaped like the `reticulum` verbs, and a comparison across
+protocols is a layer above both.
+
+| Verb | Means | Returns |
+|---|---|---|
+| `repeat(on)` | forwarding others' packets on or off | |
+| `advert()` | a zero-hop advert | |
+| `floodadv()` | a flooded advert | |
+| `contacts()` | | `[(name, public-key prefix, path length or None)]`, None for a contact reached by flood |
+| `msg(dest, text, mid)` | a direct message to the contact `dest`, by its name; `mid` is sim-mesh's id | |
+| `chan(nb, text, mid)` | a message on channel `nb` | |
+| `path(dest)` | | the contact's path, its hops' hash prefixes (`[]` for a neighbour), or None for flood |
+| `reset_path(dest)` | back to flood for that contact | |
+
+A script names the other end of `msg`, `path` and `reset_path` with `to`, a
+contact's name, which is a node's own once it has advertised it; simd passes
+it as it is. `msg` and `chan` are answered with the message's id.
+
+**Events.** The sender's driver reports what became of every message under
+its `mid`, as the event `msg.status`: `sent`, then for `msg` `delivered`
+(its acknowledgement came back) or `failed` (with `why`); a channel message
+has no acknowledgement and ends at `sent`.
+
+```
+self.msg_status(station, mid, "delivered")
+self.msg_received(station, mid, text, sender=<public-key prefix>)   # or chan=<nb>
+```
+
+The receiving station's driver reports every message the station received
+as the event `msg.received`, with `mid`, the text, and the sender's
+public-key prefix or the channel. `mid` travels in the message's text,
+put there with `sim_mesh.meshcore.driver.tagged(text, mid)` (`<text>
+#<mid>`) and read back with `untagged`, so a receiver knows it with nothing
+of the sender's.
 
 ## 8. The ether's protocol
 

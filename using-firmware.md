@@ -31,10 +31,12 @@ exactly that base for this machine.
 ## Categories
 
 A firmware's **category** says what kind of mesh its stations make, and so
-which commands its driver answers: `reticulum` (the one there is);
-`meshcore` and `meshtastic` come next. A script means the same thing on every
+which commands its driver answers: `reticulum` or `meshcore`;
+`meshtastic` comes next. A script means the same thing on every
 firmware of a category — an announce, a message, a path — and each driver
-does it its own way. [Scripting]({{ '/simulation/scripting/' | relative_url }})
+does it its own way. The categories' commands are not alike: MeshCore's
+carry meshcore-cli's names and meanings, and comparing across protocols
+is a layer above both. [Scripting]({{ '/simulation/scripting/' | relative_url }})
 lists the commands, every firmware's and each category's.
 
 ## Adding, listing, deleting

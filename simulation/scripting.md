@@ -125,6 +125,28 @@ What became of each message the driver reports as the event
 `lxmf.message.status` under that id: `pending`, `sent`, `delivered` or
 `failed`, with why.
 
+## MeshCore commands
+
+Under `.meshcore`, for a selection's nodes of category `meshcore` and
+nothing to the others. Each is meshcore-cli's command of that name:
+
+| Command | Does | Returns |
+|---|---|---|
+| `.meshcore.repeat(on)` | forwarding others' packets on or off | |
+| `.meshcore.advert()` | a zero-hop advert | |
+| `.meshcore.floodadv()` | a flooded advert | |
+| `.meshcore.contacts()` | | each node's `[(name, public-key prefix, path length)]`, the length None for a contact reached by flood |
+| `.meshcore.msg(to, text)` | a direct message to the contact `to`, a node's name once it has advertised it | `{node: the message's id}` |
+| `.meshcore.chan(nb, text)` | a message on channel `nb` | `{node: the message's id}` |
+| `.meshcore.path(to)` | | each node's path to the contact `to`, its hops' hash prefixes (`[]` for a neighbour), or None for flood |
+| `.meshcore.reset_path(to)` | back to flood for that contact | |
+
+What became of each message the sender's driver reports as the event
+`msg.status` under that id: `sent`, then for `msg` `delivered` or `failed`,
+with why; a channel message ends at `sent`. The receiver's driver reports
+each message it got as `msg.received`, with the id, the text, and the
+sender's public-key prefix or the channel.
+
 ## Running one
 
 The Scripts tab's **Run…** starts a new simulation of the script on the Nodes
