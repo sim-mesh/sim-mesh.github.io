@@ -15,7 +15,7 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # sim-mesh's tools/deploy-firmware fires this after it has uploaded to the
+  # sim-mesh's `sim firmware publish` fires this after it has uploaded to the
   # release, so new firmware is on the site without a commit here.
   repository_dispatch:
     types: [firmware-published]

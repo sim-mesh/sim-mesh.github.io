@@ -62,4 +62,4 @@ the run or snapshot goes first.
 [The pre-built firmware]({{ '/firmware/' | relative_url }}) is the `firmware`
 release of sim-mesh's repository, which this site serves; its listing carries
 each zip's facts, so the Firmware tab lists them without fetching any. A
-project publishes its zips there with sim-mesh's `tools/deploy-firmware`.
+project publishes its zips there with `sim firmware publish`.

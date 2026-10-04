@@ -455,8 +455,8 @@ shared libraries beyond the C library and C++ runtime under `lib/`, and
 `libc`, `libm`, `libstdc++`, `libgcc_s`, the loader and `libsimradio-*`
 belongs in `lib/`. Then `sim firmware add` it, and run a script with it. A
 firmware that publishes its zips puts them on
-[the pre-built list]({{ '/firmware/' | relative_url }}) with sim-mesh's
-`tools/deploy-firmware`.
+[the pre-built list]({{ '/firmware/' | relative_url }}) with
+`sim firmware publish`.
 
 sim-mesh's own README carries the same rules as its section *The firmware
 contract* ([on GitHub](https://github.com/sim-mesh/sim-mesh#the-firmware-contract)),

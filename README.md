@@ -27,7 +27,7 @@ keep their old URLs through `redirect_from`.
 `/firmware/` is not in this repo: the deploy copies the `firmware` release of
 sim-mesh/sim-mesh there — every pre-built zip, `firmware.yaml` and the
 `index.html` made from it — since a browser cannot fetch a release asset
-across origins. sim-mesh's `tools/deploy-firmware` uploads to that release and
+across origins. sim-mesh's `sim firmware publish` uploads to that release and
 fires this repo's `firmware-published` dispatch, so new firmware is on the
 site without a commit here.
 
