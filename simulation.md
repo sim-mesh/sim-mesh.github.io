@@ -52,10 +52,13 @@ for each part of it:
 | | Where | From |
 |---|---|---|
 | terrain and clutter | Berlin | its DGM1 and bDOM (1 m) |
+| | the Netherlands | AHN (0.5 m lidar) |
 | | everywhere else | Copernicus GLO-30 |
 | buildings | Berlin | its LoD2 models |
+| | the Netherlands | 3DBAG |
 | | everywhere else | OpenStreetMap |
 | population | Germany | the Zensus 2022 grid |
+| | the Netherlands | the CBS 2023 grid |
 | land cover, roads, places | the world | ESA WorldCover, OpenStreetMap |
 
 A geodata goes from one machine to another as a zip, **Export zip** and
