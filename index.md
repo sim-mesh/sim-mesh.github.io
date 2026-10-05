@@ -88,5 +88,5 @@ them and builds geodata packs from public data. Around them are the things sim-m
 sim-mesh holds nothing of any one firmware project. A firmware tells sim-mesh
 how to talk to it through its **driver**, a Python module in its own zip, and
 a script asks for the same things — an announce, a message, a path — of every
-firmware of a category. There are two categories, Reticulum and MeshCore
-(companions, repeaters and room servers); Meshtastic is next.
+firmware of a category. There are three categories: Reticulum, MeshCore
+(companions, repeaters and room servers) and Meshtastic.

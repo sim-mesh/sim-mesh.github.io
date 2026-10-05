@@ -71,7 +71,7 @@ A YAML mapping at the archive's root.
 | `base` | yes | as in the name |
 | `arch` | yes | as in the name |
 | `version` | yes | as in the name, a string |
-| `category` | yes | the driver interface its driver implements, and so the verbs it answers: `reticulum` (§7), `meshcore` (§7a); `meshtastic` to come |
+| `category` | yes | the driver interface its driver implements, and so the verbs it answers: `reticulum` (§7), `meshcore` (§7a), `meshtastic` (§7b) |
 | `exec` | yes | the executable's path in the archive |
 | `driver` | yes | the driver's path in the archive, a Python file (§6) |
 | `radio` | no | the virtual radio it is linked with, by the library's name: `sx1262` is `libsimradio-sx1262.so` (§9). Absent: sim-mesh provides none, and the station speaks the ether's protocol itself (§8) or has no radio |
@@ -353,9 +353,53 @@ self.msg_received(station, mid, text, sender=<public-key prefix>)   # or chan=<n
 The receiving station's driver reports every message the station received
 as the event `msg.received`, with `mid`, the text, and the sender's
 public-key prefix or the channel. `mid` travels in the message's text,
-put there with `sim_mesh.meshcore.driver.tagged(text, mid)` (`<text>
-#<mid>`) and read back with `untagged`, so a receiver knows it with nothing
-of the sender's.
+put there with `sim_mesh.driver.tagged(text, mid)` (`<text> #<mid>`) and
+read back with `untagged`, so a receiver knows it with nothing of the
+sender's. `msg_status`, `msg_received`, `tagged` and `untagged` are every
+driver's (`sim_mesh.driver`), shared with the `meshtastic` category, and
+`sim_mesh.meshcore.driver` offers them under the same names.
+
+## 7b. The `meshtastic` category
+
+```
+script ── node(n).meshtastic.sendtext(text, to) ──► simd: mid ──► sendtext(text, mid, dest) ──► station
+sender ── queued, then its routing answer ──► its driver ──► msg.status {mid, status}
+receiver ── the text, mid in it ──► its driver ──► msg.received {mid, text, sender | chan}
+```
+
+A firmware of category `meshtastic` is a Meshtastic node. Its `DRIVER`
+subclasses `sim_mesh.meshtastic.driver.MeshtasticDriver` and implements
+every firmware's verbs and the category's, each taking the station first; a
+verb it cannot do raises `CommandError` (`self.cannot(verb)`), which the
+default does. A script reaches them as `<selection>.meshtastic.<verb>`.
+They carry the Meshtastic CLI's option names (`--sendtext`,
+`--traceroute`, `--nodes`) and mean what those mean.
+
+| Verb | Means | Returns |
+|---|---|---|
+| `role(role)` | its device role, Meshtastic's in lower case: `client`, `client_mute`, `client_hidden`, `client_base`, `router`, `router_late`, `tracker`, `sensor`, `tak`, `tak_tracker`, `lost_and_found` | |
+| `hop_limit(n)` | the hops a packet it originates may take, 0–7 | |
+| `sendtext(text, mid, dest=None, ch_index=0, want_ack=True)` | a text message to the node named `dest`, or on channel `ch_index` when `dest` is None; `mid` is sim-mesh's id | |
+| `traceroute(dest)` | | `{route, snr_towards, route_back, snr_back}`, hops as node names where known |
+| `nodes()` | | `[(name, id, hops_away, snr, last_heard)]` |
+| `nodeinfo()` | a NodeInfo broadcast now | |
+
+`current_role(station)` says `router` for `router` and `router_late`,
+`client` otherwise. A script names the other end of `sendtext` and
+`traceroute` with `to`, a node's name (its Meshtastic long name, which its
+driver sets to the node's own); simd passes it as it is. A `sendtext`
+without `to` is a channel message; a `traceroute` without it is refused.
+`sendtext` is answered with the message's id.
+
+**Events**, as for `meshcore` (§7a): the sender's driver reports
+`msg.status` `sent` once the firmware has queued the message, or `failed`
+with `why` when it refused it; a direct message then ends `delivered` (its
+acknowledgement came back from its destination) or `failed` (the routing
+error, `MAX_RETRANSMIT` among them); a channel message ends at `sent`,
+unless the firmware refused it after all (a rate limit). A message still
+open when its station restarts is reported `failed`, `why: "station
+restarted"`. The receiver's driver reports `msg.received` with the sender's
+`!id` or the channel, `mid` read back out of the text.
 
 ## 8. The ether's protocol
 

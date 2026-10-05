@@ -147,6 +147,25 @@ with why; a channel message ends at `sent`. The receiver's driver reports
 each message it got as `msg.received`, with the id, the text, and the
 sender's public-key prefix or the channel.
 
+## Meshtastic commands
+
+Under `.meshtastic`, for a selection's nodes of category `meshtastic` and
+nothing to the others. Each is named as the Meshtastic CLI's option:
+
+| Command | Does | Returns |
+|---|---|---|
+| `.meshtastic.role(role)` | its device role, Meshtastic's in lower case (`client`, `router`, `router_late`, …) | |
+| `.meshtastic.hop_limit(n)` | the hops a packet it originates may take, 0–7 | |
+| `.meshtastic.sendtext(text, to=None, ch_index=0, want_ack=True)` | a text message to the node `to`, by its name, or on channel `ch_index` when `to` is None | `{node: the message's id}` |
+| `.meshtastic.traceroute(to)` | | each node's route to `to` and back, `{route, snr_towards, route_back, snr_back}` |
+| `.meshtastic.nodes()` | | each node's `[(name, id, hops away, snr, last heard)]` |
+| `.meshtastic.nodeinfo()` | a NodeInfo broadcast now | |
+
+What became of each message is reported as for MeshCore: `msg.status` under
+its id, `sent`, then for a direct message `delivered` or `failed`, with why,
+and a channel message ends at `sent`; `msg.received` at the receiver, with
+the sender's `!id` or the channel.
+
 ## Running one
 
 The Scripts tab's **Run…** starts a new simulation of the script on the Nodes
