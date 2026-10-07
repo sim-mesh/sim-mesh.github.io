@@ -30,6 +30,15 @@ geodata:
     bbox: [-122.6029, 38.1427, -122.3435, 38.3945]
     licences: Copernicus GLO-30 DSM; USGS 3DEP 1/3 arc-second terrain; WorldPop 2025 United States population; ESA WorldCover 2021 land cover; Annual NLCD 2025 land cover; OpenStreetMap roads/rail; OpenStreetMap places/streets/postal codes; OpenStreetMap buildings
     tags: [rural, hilly, "30m"]
+  - name: graz
+    title: Graz, a city in a valley between hills, 10 m
+    description: "About 17 × 15 km of Graz, Austria at 10 m: BEV's 1 m lidar terrain and surface and Statistik Austria's 2026 population grid, with OpenStreetMap buildings, roads and places, and WorldCover."
+    url: https://github.com/sim-mesh/sim-mesh/releases/download/examples/graz.zip
+    sha256: a1727e3b22ceae764ff46dc88549f68018502fb75410fd39ae766d5801fc8cee
+    bytes: 34284131
+    bbox: [15.3041, 47.0056, 15.5254, 47.1433]
+    licences: Copernicus GLO-30 DSM; BEV ALS DTM 1 m terrain and BEV ALS DSM 1 m surface; Statistik Austria 100 m population grid 2026; ESA WorldCover 2021 land cover; OpenStreetMap roads/rail; OpenStreetMap places/streets/postal codes; OpenStreetMap buildings
+    tags: [city, hilly, "10m"]
 nodesets:
   - name: berlin-50
     title: 50 MeshCore nodes in central Berlin
