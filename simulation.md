@@ -26,7 +26,8 @@ has the names, the categories, and how to build firmware for sim-mesh.
 A node carries one antenna from the catalogue — a bare quarter-wave wire, a
 spring helical, a fibreglass collinear, a panel, a yagi — each a pattern of
 five figures: peak gain, vertical beamwidth, tilt, horizontal beamwidth for
-a directional one, and a floor. Between two nodes the direction is the line
+a directional one, and a floor, the same on the sub-GHz bands (433, 868
+and 915 MHz). Between two nodes the direction is the line
 between their antenna tips in three dimensions, the earth's curvature taken
 off, so a low node under a high collinear's narrow beam hears less of it than
 one on the horizon, and a yagi hears what it faces. The **Antennas** tab
@@ -45,7 +46,7 @@ ground stands on any other. A pair's loss is log-distance,
 **A pack** is ground compiled from public sources — terrain, clutter,
 buildings, roads and places, in a UTM zone. A pair's loss on it is ITU-R
 P.1812-8 over the real profile, and the map draws the pack's ground, roads
-and buildings with the notices of its sources. **Build from sources…** on the
+and buildings with the notices of its sources. **Build** on the
 **Geodata** tab makes one over a rectangle of the map, taking the best source
 for each part of it:
 
@@ -64,7 +65,7 @@ for each part of it:
 | land cover, roads, places | the world | ESA WorldCover, OpenStreetMap |
 
 A geodata goes from one machine to another as a zip, **Export zip** and
-**Import zip…**; a bare planner pack imports too. Nodes are never part of
+**Import zip**; a bare planner pack imports too. Nodes are never part of
 the ground: they belong to nodesets.
 
 **Pre-built ground** comes from an **index**: one YAML file listing geodata
@@ -74,7 +75,7 @@ is at [sim-mesh.net/examples/index.yaml]({{ '/examples/index.yaml' | relative_ur
 reference environments for comparing mesh protocols and firmware versions,
 as well as for showing sim-mesh. Anyone
 can publish another, a directory holding an `index.yaml` and its files, and
-**Add index…** lists it. The **Geodata** tab has three sections: the
+**Add index** lists it. The **Geodata** tab has three sections: the
 installed geodata, each with its size, what the indexes offer under
 **Download pre-built geodata packs**, and the build's sources with what each holds
 in the cache.
@@ -85,7 +86,9 @@ Which nodes stand where — latitude, longitude, height above the ground — wit
 each one's maximum power at the antenna connector, its antenna, its tags, and
 offsets: dB added to one pair's computed loss, where a measurement says the
 model is wrong. A nodeset stands on any geodata whose extent holds one of its
-nodes, as a layer of the **Nodes** tab, and several layers run as one.
+nodes, and is listed on that geodata's **Nodes** tab: the checked ones
+are on its map together, several can be saved or run as one, and a click
+on one opens it to edit.
 
 Every node is one board, an SX1262: at 22 dBm or below a bare chip, above it
 (up to 27 dBm) an SX1262 behind a GC1109 front end, as a Heltec V4 is. A node
@@ -95,9 +98,9 @@ is told its board when its station starts.
 the MeshCore map, a PotatoMesh instance, planner sites, a deployed-network
 CSV, any CSV whose columns the dialog asks to be named, GeoJSON points, KML
 placemarks, GPX waypoints or a Meshtastic node list, each node tagged with
-its source. **Nodesets…** in the Layers panel lists every nodeset with its
-size, and what the indexes offer; a nodeset from an index brings the
-geodata it is made for.
+its source. The Nodes tab's list says each nodeset's size, and below it
+what the indexes offer; a nodeset from an index brings the geodata it is
+made for.
 
 ## Scripts
 

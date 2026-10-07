@@ -5,7 +5,9 @@ description: >-
   model of the radio chip and one medium that decides who hears what from the
   ground they stand on, in real time or in virtual time.
 email: crew@sim-mesh.net
-github_org: https://github.com/sim-mesh
+# Where the site's GitHub links go: the sim-mesh repository, as the
+# organisation's own front page has nothing on it yet.
+github: https://github.com/sim-mesh/sim-mesh
 
 # The site's own domain. Jekyll builds `absolute_url` — the canonical link and
 # every entry in the sitemap — from this. Which host the deploy answers on is

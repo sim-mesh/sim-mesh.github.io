@@ -41,8 +41,9 @@ lists the commands, every firmware's and each category's.
 
 ## Adding, listing, deleting
 
-On the **Firmware** tab: **Add from zip…**, **Add from pre-built…**, and a
-trash can per firmware. From a shell:
+On the **Firmware** tab: **Import zip**, **Download pre-built firmware** below
+the installed list, and a trash can per firmware. Deleting one that a paused
+simulation needs warns that it stops that simulation for good. From a shell:
 
 ```sh
 sim firmware add relay-sx1262_aarch64_20260930163128.zip

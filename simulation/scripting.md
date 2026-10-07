@@ -168,8 +168,9 @@ the sender's `!id` or the channel.
 
 ## Running one
 
-The Scripts tab's **Run…** starts a new simulation of the script on the Nodes
-tab's geodata and shown nodesets, or runs it on one already running or
+The Scripts tab's **Run** starts a new simulation of the script on the Nodes
+tab's geodata and its open nodeset, or else the ones checked in its list
+(several merged), or runs it on one already running or
 paused; from a shell:
 
 ```sh

@@ -22,7 +22,7 @@
         {%- assign under = page.url | slice: 0, item.url.size %}
         <li><a href="{{ item.url | relative_url }}"{% if page.url == item.url %} aria-current="page"{% elsif item.children and under == item.url %} aria-current="true"{% endif %}>{{ item.name }}</a></li>
         {%- endfor %}
-        <li><a href="{{ site.github_org }}">GitHub</a></li>
+        <li><a href="{{ site.github }}">GitHub</a></li>
       </ul>
     </nav>
   </div>
@@ -74,7 +74,7 @@
 
 <footer class="sitefoot">
   <div class="wrap">
-    <p class="fineprint">© 2026 Sergey Redyuk, Rop Gonggrijp and other contributors, <a href="{{ site.github_org }}">source on GitHub</a>, licensed under Apache 2.0. Contact <a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
+    <p class="fineprint">© 2026 Sergey Redyuk, Rop Gonggrijp and other contributors, <a href="{{ site.github }}">source on GitHub</a>, licensed under Apache 2.0. Contact <a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
   </div>
 </footer>
 

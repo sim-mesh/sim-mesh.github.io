@@ -35,9 +35,9 @@ and opens the page on the run.
 
 ## 3. Add firmware
 
-On the **Firmware** tab, **Add from pre-built…** lists what this site offers
-for your machine's architecture and installs one with a click; **Add from
-zip…** installs a zip of your own. From a shell:
+On the **Firmware** tab, **Download pre-built firmware** lists what this site
+offers for your machine's architecture and **Add** installs one; **Import
+zip** installs a zip of your own. From a shell:
 
 ```sh
 sim-mesh/sim firmware prebuilt               # what sim-mesh.net offers this machine
@@ -49,18 +49,19 @@ sim-mesh/sim firmware list
 
 Geodata and nodesets are fetched from an index or made here. On the
 **Geodata** tab, **Download pre-built geodata packs** lists what sim-mesh's own
-index and any you add offer, and **Add** installs one; or make ground —
-**Build…** over a rectangle of the map, or **New synthetic…** — and click it
-to choose it. On the **Nodes** tab place nodes on it, **Import…** them in
-the Layers panel from a public node map or a file, or fetch a nodeset under
-**Nodesets…**, and **Save nodes as nodeset…**. [Simulation]({{ '/simulation/' | relative_url }})
+index and any you add offer, and a click on one installs it; or make ground —
+**Build** over a rectangle of the map, or **New synthetic** — and click it
+to choose it. The **Nodes** tab lists the nodesets on it beside a map of
+them: **New** one and place nodes on it, **Import** them from a public node
+map or a file, or fetch one under **Download pre-built nodesets**; a click
+on a nodeset opens it to edit. [Simulation]({{ '/simulation/' | relative_url }})
 says what each of those is.
 
 ## 5. A first simulation
 
 On the **Scripts** tab open `lxmf-traffic`, choose the firmware its nodes
 run in **Firmware for nodes not otherwise configured** above the script, and
-**Run…** it: a new simulation of the nodeset on that ground, in virtual time.
+**Run** it: a new simulation of the nodeset on that ground, in virtual time.
 The page goes over to the simulation's live map and its stations come up;
 rings on the map are frames on the air. When it is done the simulation is
 paused and its **Report** says how much of an hour of messages arrived.
