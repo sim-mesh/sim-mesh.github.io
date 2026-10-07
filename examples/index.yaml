@@ -30,4 +30,13 @@ geodata:
     bbox: [-122.6029, 38.1427, -122.3435, 38.3945]
     licences: Copernicus GLO-30 DSM; USGS 3DEP 1/3 arc-second terrain; WorldPop 2025 United States population; ESA WorldCover 2021 land cover; Annual NLCD 2025 land cover; OpenStreetMap roads/rail; OpenStreetMap places/streets/postal codes; OpenStreetMap buildings
     tags: [rural, hilly, "30m"]
-nodesets: []
+nodesets:
+  - name: berlin-50
+    title: 50 MeshCore nodes in central Berlin
+    description: "Based on a truncated MeshCore map: the 40 repeaters and 10 companions nearest the middle of berlin-centre, positions as advertised in September 2026, all at an invented 15 m. Repeaters are tagged repeater; companions are untagged."
+    url: https://github.com/sim-mesh/sim-mesh/releases/download/examples/berlin-50.yaml
+    sha256: 0b390a22212ae11590e5efb0e258f633b1d30177620ae565996929e124cba072
+    bytes: 7648
+    tags: [meshcore, city]
+    geodata: berlin-centre
+    nodes: 50
