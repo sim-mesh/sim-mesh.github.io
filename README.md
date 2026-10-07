@@ -40,6 +40,11 @@ bundle exec jekyll serve      # http://localhost:4000/
 
 ## The domain
 
+**Settings → Pages → Source** on this repo is **GitHub Actions**: the site is
+only what `pages.yml` deploys. Deploying from the branch instead runs GitHub's
+own build of it beside the workflow on every push, and whichever lands last
+is the site; GitHub's has no `/firmware/`.
+
 The site is `sim-mesh.net`: the domain's A and AAAA records are GitHub's
 published Pages addresses, and **Settings → Pages → Custom domain** on this
 repo holds `sim-mesh.net`, with **Enforce HTTPS** once GitHub has issued the
