@@ -55,21 +55,33 @@ jobs:
         env:
           JEKYLL_ENV: production
 
+      # Asked with the workflow's token: unauthenticated, the API's rate limit
+      # is shared by every job on the runner's address, and refuses with 403.
+      # No release (404) is an empty list; any other failure fails the deploy,
+      # so a refused request never replaces the list with an empty one.
       - name: Add the pre-built firmware
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           api="https://api.github.com/repos/${FIRMWARE_REPO}/releases/tags/firmware"
-          body="$(curl -fsSL -H 'Accept: application/vnd.github+json' "$api" || true)"
           dest="_site/firmware"
           mkdir -p "$dest"
-          if [ -z "$body" ]; then
+          status="$(curl -sSL -o release.json -w '%{http_code}' \
+            -H 'Accept: application/vnd.github+json' -H "Authorization: Bearer ${GH_TOKEN}" "$api")"
+          if [ "$status" = 404 ]; then
             echo "::warning::no firmware release in ${FIRMWARE_REPO} — /firmware/ lists nothing"
             printf '%s\n' '<!doctype html><meta charset="utf-8"><title>Pre-built firmware</title>' \
               '<h1>Pre-built firmware</h1><p>None published yet.</p>' > "$dest/index.html"
             exit 0
           fi
+          if [ "$status" != 200 ]; then
+            echo "::error::asking for ${FIRMWARE_REPO}'s firmware release: HTTP ${status}"
+            cat release.json
+            exit 1
+          fi
           # Every asset, named as it was uploaded: the release is the directory.
-          printf '%s' "$body" | jq -r '.assets[] | [.name, .browser_download_url] | @tsv' \
+          jq -r '.assets[] | [.name, .browser_download_url] | @tsv' release.json \
           | while IFS="$(printf '\t')" read -r name url; do
               curl -fsSL --retry 3 -o "${dest}/${name}" "$url"
             done
