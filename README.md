@@ -2,7 +2,7 @@
 
 The site at **[sim-mesh.net](https://sim-mesh.net/)**: sim-mesh's pages, how to
 build firmware for it, and the pre-built firmware. Its repository on GitHub is
-sim-mesh/sim-mesh.github.io, as GitHub Pages names an organisation's site.
+sim-mesh/sim-mesh.net.
 
 ```
 this repo (Jekyll pages) ──┐
@@ -33,9 +33,13 @@ site without a commit here.
 
 ## Previewing
 
+With this repo checked out beside sim-mesh, `sim dev` there serves it at
+`http://localhost:4000/` from its image, live-reloading as pages are saved.
+Without sim-mesh, with Ruby and bundler:
+
 ```sh
 bundle install
-bundle exec jekyll serve      # http://localhost:4000/
+bundle exec jekyll serve --livereload     # http://localhost:4000/
 ```
 
 ## The domain

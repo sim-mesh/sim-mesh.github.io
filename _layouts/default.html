@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap">
-<link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 </head>
 <body>
 
@@ -34,6 +34,11 @@
     <p>{% for line in page.hero %}{{ line }}{% unless forloop.last %}<br>{% endunless %}{% endfor %}</p>
     <p class="tagline">{% for line in page.hero_sub %}{{ line }}{% unless forloop.last %}<br>{% endunless %}{% endfor %}</p>
   </div>
+</div>
+<div class="hero-shots">
+  {%- for shot in page.hero_shots %}
+  <figure class="shot"><button type="button"><img src="{{ '/assets/img/' | append: shot.name | append: '.png' | relative_url }}" data-full="{{ '/assets/img/full/' | append: shot.name | append: '.png' | relative_url }}" width="1200" height="800" alt="{{ shot.alt }}"></button></figure>
+  {%- endfor %}
 </div>
 {%- endif %}
 
@@ -86,7 +91,7 @@
     var shot=e.target.closest(".shot button");
     if(shot){
       var img=shot.querySelector("img");
-      full.src=img.currentSrc||img.src;
+      full.src=img.dataset.full||img.currentSrc||img.src;
       full.alt=img.alt;
       box.hidden=false;
     }else if(!box.hidden){

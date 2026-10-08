@@ -6,6 +6,19 @@ hero:
 hero_sub:
   - Try locations, plan networks, script scenarios, compare mesh protocol performance
   - Free (Apache 2.0), uses public geodata
+hero_shots:
+  - name: antennas
+    alt: "The Antennas tab: an antenna's horizontal and vertical radiation patterns"
+  - name: nodes
+    alt: "The Nodes tab: a node's coverage over Berlin, a link's terrain profile, and the node's radio and antenna settings"
+  - name: geodata
+    alt: "The Geodata tab: installed geodata packs, and pre-built ones to download"
+  - name: geodata2
+    alt: "The Geodata tab: the public sources packs are built from, and where one has data"
+  - name: scripts
+    alt: "The Scripts tab: a traffic script in the editor"
+  - name: report
+    alt: "A run's report: message delivery, latency and ETSI duty-cycle compliance"
 description: >-
   sim-mesh runs real LoRa mesh firmware, built as Linux processes, over a
   model of the radio chip and one medium that decides who hears what from the
