@@ -31,8 +31,8 @@
 {%- if page.url == "/" %}
 <div class="wrap">
   <div class="intro">
-    <p>{{ page.hero | default: site.description | strip_newlines }}</p>
-    <p class="tagline">{{ site.tagline }}</p>
+    <p>{% for line in page.hero %}{{ line }}{% unless forloop.last %}<br>{% endunless %}{% endfor %}</p>
+    <p class="tagline">{% for line in page.hero_sub %}{{ line }}{% unless forloop.last %}<br>{% endunless %}{% endfor %}</p>
   </div>
 </div>
 {%- endif %}

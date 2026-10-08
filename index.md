@@ -1,6 +1,11 @@
 ---
 title: Home
-hero: Real mesh firmware, many nodes, one simulated ether.
+hero:
+  - Radio propagation & coverage planning
+  - Run real mesh firmware in virtual ether
+hero_sub:
+  - Try locations, plan networks, script scenarios, compare mesh protocol performance
+  - Free (Apache 2.0), uses public geodata
 description: >-
   sim-mesh runs real LoRa mesh firmware, built as Linux processes, over a
   model of the radio chip and one medium that decides who hears what from the

@@ -1,5 +1,5 @@
 title: sim-mesh
-tagline: Real mesh firmware, a simulated radio, geodata packs
+tagline: Radio propagation & coverage planning
 description: >-
   sim-mesh runs real LoRa mesh firmware, built as Linux processes, over a
   model of the radio chip and one medium that decides who hears what from the

@@ -1,16 +1,16 @@
 /* The jekyllrb.com design, rebuilt: Lato on a dark ground, content in a raised
-   card, gold links, and the notched note boxes. Same greys;
-   modern layout primitives instead of floats and vendor prefixes.
+   card, gold links, and the notched note boxes. Brighter ink and regular-weight
+   body text for contrast; modern layout primitives instead of floats and vendor prefixes.
    --brand is the only per-site value — the logo dot, the rule under the hero
    tagline, and the current item in the sidebar. */
 :root{
   color-scheme:dark;
 
-  --ink:#ddd;
-  --ink-dim:#999;
+  --ink:#f0f0f0;
+  --ink-dim:#c4c4c4;
   --ink-bright:#fff;
-  --ground:#333;
-  --card:#444;
+  --ground:#2e2e2e;
+  --card:#3b3b3b;
   --header:#2b2b2b;
   --header-hover:#252525;
   --foot:#212121;
@@ -42,7 +42,7 @@ body{
   margin:0;
   font-family:"Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
   font-size:26px;
-  font-weight:300;
+  font-weight:400;
   line-height:1.5;
   color:var(--ink);
   background-color:var(--ground);
@@ -121,18 +121,17 @@ em,i{font-style:italic}
 /* ---------- hero, on the landing page ---------- */
 .intro{padding:40px 0 30px;text-align:center}
 .intro p{
-  font-size:clamp(1.75em,6.25vw,3.2em);
-  line-height:1.05;
+  font-size:clamp(1.5em,5vw,2.5em);
+  line-height:1.15;
   margin:0;
-  font-weight:300;
+  font-weight:400;
   color:var(--ink-bright);
 }
 .intro .tagline{
-  font-size:clamp(.85em,3vw,1.05em);
+  font-size:clamp(.75em,2.6vw,.95em);
+  line-height:1.45;
   color:var(--ink-dim);
   margin-top:18px;
-  text-transform:uppercase;
-  letter-spacing:.12em;
   font-weight:400;
 }
 .intro .tagline::after{
